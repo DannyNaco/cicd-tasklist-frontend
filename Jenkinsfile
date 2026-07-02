@@ -97,9 +97,14 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh 'printf "%s" "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                    sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    sh "docker push ${DOCKER_IMAGE}:latest"
+                    sh '''
+                        mkdir -p /tmp/docker-cfg
+                        AUTH=$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" | base64 | tr -d '\\n')
+                        printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' "$AUTH" > /tmp/docker-cfg/config.json
+                        DOCKER_CONFIG=/tmp/docker-cfg docker push $DOCKER_IMAGE:$DOCKER_TAG
+                        DOCKER_CONFIG=/tmp/docker-cfg docker push $DOCKER_IMAGE:latest
+                        rm -rf /tmp/docker-cfg
+                    '''
                 }
             }
         }
