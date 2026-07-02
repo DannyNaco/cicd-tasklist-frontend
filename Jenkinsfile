@@ -41,15 +41,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh """
+                    sh '''
                         sonar-scanner \
-                          -Dsonar.host.url=${SONAR_URL} \
-                          -Dsonar.token=${SONAR_TOKEN} \
+                          -Dsonar.host.url=$SONAR_URL \
+                          -Dsonar.token=$SONAR_TOKEN \
                           -Dsonar.projectKey=tasklist-frontend \
                           -Dsonar.sources=src \
                           -Dsonar.exclusions=src/__tests__/**,src/main.tsx \
                           -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                    """
+                    '''
                 }
             }
         }
